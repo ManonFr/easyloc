@@ -1,7 +1,10 @@
 jest.mock("../sql/sqlConnection");
 
 const db = require("../sql/sqlConnection");
-const { getPaymentByContractId } = require("../sql/queries/billingQueries");
+const {
+  getPaymentByContractId,
+  isContractFullyPaid,
+} = require("../sql/queries/billingQueries");
 
 describe("Billing queries (with mocked DB)", () => {
   beforeEach(() => {
@@ -30,5 +33,22 @@ describe("Billing queries (with mocked DB)", () => {
 
     expect(result).toEqual(fakePayments);
     expect(db.query).toHaveBeenCalledWith(expect.any(String), [10]);
+  });
+
+  test("isContractFullyPaid should return true if paid amount >= contract price", async () => {
+    db.query.mockResolvedValue([[{ is_paid: 1 }]]);
+
+    const result = await isContractFullyPaid(42);
+
+    expect(result).toBe(true);
+    expect(db.query).toHaveBeenCalledWith(expect.any(String), [42, 42]);
+  });
+
+  test("isContractFullyPaid should return false if paid amount < contract price", async () => {
+    db.query.mockResolvedValue([[{ is_paid: 0 }]]);
+
+    const result = await isContractFullyPaid(42);
+
+    expect(result).toBe(false);
   });
 });
