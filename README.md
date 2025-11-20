@@ -13,7 +13,7 @@ Build a **reusable and secure library** that connects to two types of databases:
 - A **SQL database (MySQL)** for managing:
 
   - Rental contracts (`Contract`)
-  - Payments (`Billing`) ← not yet implemented
+  - Payments (`Billing`)
 
 - A **NoSQL database (MongoDB)** for managing:
   - Customers
