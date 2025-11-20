@@ -33,7 +33,24 @@ async function getOngoingContractsByCustomerUid(customerUid) {
   return rows;
 }
 
+/**
+ * Count how many times each customer returned a vehicle late.
+ * A return is considered late is it's more than 1 hour after loc_end_datetime.
+ * @returns {Promise<Array>} - Array of {customer_uid, late_returns_count}
+ */
+async function countLateReturnsByCustomer() {
+  const [rows] = await db.query(
+    `SELECT customer_uid,
+            COUNT(*) AS late_returns_count
+     FROM Contract
+     WHERE TIMESTAMPDIFF(HOUR, loc_end_datetime, returning_datetime) > 1
+     GROUP BY customer_uid`
+  );
+  return rows;
+}
+
 module.exports = {
   getContractsByCustomerUid,
   getOngoingContractsByCustomerUid,
+  countLateReturnsByCustomer,
 };

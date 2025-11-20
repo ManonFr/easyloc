@@ -5,6 +5,7 @@ const db = require("../sql/sqlConnection");
 const {
   getContractsByCustomerUid,
   getOngoingContractsByCustomerUid,
+  countLateReturnsByCustomer,
 } = require("../sql/queries/clients");
 
 describe("Client queries (with mocked DB)", () => {
@@ -40,5 +41,19 @@ describe("Client queries (with mocked DB)", () => {
 
     expect(result).toEqual(fakeOngoingContracts);
     expect(db.query).toHaveBeenCalledWith(expect.any(String), ["abc-123"]);
+  });
+
+  test("countLateReturnsByCustomer should return number of late returns per customer", async () => {
+    const fakeLateReturns = [
+      { customer_uid: "abc-123", late_returns_count: 2 },
+      { customer_uid: "def-456", late_returns_count: 1 },
+    ];
+
+    db.query.mockResolvedValue([fakeLateReturns]);
+
+    const result = await countLateReturnsByCustomer();
+
+    expect(result).toEqual(fakeLateReturns);
+    expect(db.query).toHaveBeenCalledWith(expect.any(String));
   });
 });
