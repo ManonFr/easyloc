@@ -15,6 +15,25 @@ async function getContractsByCustomerUid(customerUid) {
   return rows;
 }
 
+/**
+ * Get all ongoing contracts for a specific customer.
+ * A contract is ongoing if it's between loc_begin and loc_end, and not yet returned.
+ * @param {string} customerUid
+ * @returns {Promise<Array>}
+ */
+async function getOngoingContractsByCustomerUid(customerUid) {
+  const [rows] = await db.query(
+    `SELECT id, vehicle_uid, loc_begin_datetime, loc_end_datetime
+     FROM Contract
+     WHERE customer_uid = ?
+     AND NOW() BETWEEN loc_begin_datetime AND loc_end_datetime
+     AND (returning_datetime IS NULL OR returning_datetime > NOW())`,
+    [customerUid]
+  );
+  return rows;
+}
+
 module.exports = {
   getContractsByCustomerUid,
+  getOngoingContractsByCustomerUid,
 };
