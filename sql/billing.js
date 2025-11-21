@@ -1,11 +1,9 @@
-const { getSqlConnection } = require("./sqlConnection");
+const db = require("./sqlConnection");
 
 /**
  * Creates the Billing table if it doesn't exist
  */
 async function createBillingTable() {
-  const connection = await getSqlConnection();
-
   const query = `
     CREATE TABLE IF NOT EXISTS Billing (
       id INT PRIMARY KEY,
@@ -17,12 +15,10 @@ async function createBillingTable() {
   `;
 
   try {
-    await connection.execute(query);
+    await db.query(query);
     return true;
   } catch (error) {
     throw new Error(`Error creating Billing table: ${error.message}`);
-  } finally {
-    await connection.end();
   }
 }
 
@@ -31,8 +27,6 @@ async function createBillingTable() {
  * @param {Object} billing - Billing object
  */
 async function insertBilling(billing) {
-  const connection = await getSqlConnection();
-
   const query = `
     INSERT INTO Billing (id, contract_id, payment_datetime, amount)
     VALUES (?, ?, ?, ?);
@@ -46,12 +40,10 @@ async function insertBilling(billing) {
   ];
 
   try {
-    await connection.execute(query, values);
+    await db.query(query, values);
     return true;
   } catch (error) {
     throw new Error(`Error inserting billing: ${error.message}`);
-  } finally {
-    await connection.end();
   }
 }
 
@@ -61,19 +53,48 @@ async function insertBilling(billing) {
  * @returns {Array} List of billing records
  */
 async function getBillingsByContract(contractId) {
-  const connection = await getSqlConnection();
-
   const query = `
-    SELECT * FROM Billing WHERE contract_id = ?
+    SELECT 
+      id,
+      contract_id,
+      payment_datetime,
+      amount
+    FROM Billing
+    WHERE contract_id = ?
   `;
 
   try {
-    const [rows] = await connection.execute(query, [contractId]);
+    const [rows] = await db.query(query, [contractId]);
     return rows;
   } catch (error) {
     throw new Error(`Error retrieving billings: ${error.message}`);
-  } finally {
-    await connection.end();
+  }
+}
+
+/**
+ * Updates a billing record by ID
+ * @param {Object} billing - Billing object with updated data (must include `id`)
+ * @returns {boolean} True if update was successful
+ */
+async function updateBilling(billing) {
+  const query = `
+    UPDATE Billing
+    SET contract_id = ?, payment_datetime = ?, amount = ?
+    WHERE id = ?
+  `;
+
+  const values = [
+    billing.contract_id,
+    billing.payment_datetime,
+    billing.amount,
+    billing.id,
+  ];
+
+  try {
+    const [result] = await db.query(query, values);
+    return result.affectedRows > 0;
+  } catch (error) {
+    throw new Error(`Error updating billing: ${error.message}`);
   }
 }
 
@@ -83,19 +104,15 @@ async function getBillingsByContract(contractId) {
  * @returns {boolean} True if deleted
  */
 async function deleteBilling(id) {
-  const connection = await getSqlConnection();
-
   const query = `
     DELETE FROM Billing WHERE id = ?
   `;
 
   try {
-    const [result] = await connection.execute(query, [id]);
+    const [result] = await db.query(query, [id]);
     return result.affectedRows > 0;
   } catch (error) {
     throw new Error(`Error deleting billing: ${error.message}`);
-  } finally {
-    await connection.end();
   }
 }
 
@@ -103,5 +120,6 @@ module.exports = {
   createBillingTable,
   insertBilling,
   getBillingsByContract,
+  updateBilling,
   deleteBilling,
 };
