@@ -4,6 +4,7 @@ const db = require("../sql/sqlConnection");
 const {
   getPaymentByContractId,
   isContractFullyPaid,
+  getUnpaidContracts,
 } = require("../sql/queries/billingQueries");
 
 describe("Billing queries (with mocked DB)", () => {
@@ -50,5 +51,19 @@ describe("Billing queries (with mocked DB)", () => {
     const result = await isContractFullyPaid(42);
 
     expect(result).toBe(false);
+  });
+
+  test("getUnpaidContracts should return contracts with unpaid balances", async () => {
+    const unpaidContracts = [
+      { id: 1, customer_uid: "abc-123", price: 500, total_paid: 300 },
+      { id: 2, customer_uid: "def-456", price: 800, total_paid: 700 },
+    ];
+
+    db.query.mockResolvedValue([unpaidContracts]);
+
+    const result = await getUnpaidContracts();
+
+    expect(result).toEqual(unpaidContracts);
+    expect(db.query).toHaveBeenCalledWith(expect.any(String));
   });
 });

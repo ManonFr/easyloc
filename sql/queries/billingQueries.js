@@ -34,7 +34,25 @@ async function isContractFullyPaid(contractId) {
   return rows[0]?.is_paid === 1;
 }
 
+/**
+ * Get all contracts that are not fully paid.
+ * A contract is unpaid if the total payments < contract price.
+ * @returns {Promise<Array>} - List of unpaid contracts.
+ */
+async function getUnpaidContracts() {
+  const [rows] = await db.query(
+    `SELECT c.id, c.customer_uid, c.price, IFNULL(SUM(b.amount), 0) AS total_paid
+     FROM Contract c
+     LEFT JOIN Billing b ON c.id = b.contract_id
+     GROUP BY c.id
+     HAVING total_paid < c.price`
+  );
+
+  return rows;
+}
+
 module.exports = {
   getPaymentByContractId,
   isContractFullyPaid,
+  getUnpaidContracts,
 };
