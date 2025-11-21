@@ -1,12 +1,12 @@
 // Use the mocked DB connection
-jest.mock("../sql/sqlConnection");
+jest.mock("../../sql/sqlConnection");
 
-const db = require("../sql/sqlConnection");
+const db = require("../../sql/sqlConnection");
 const {
   getContractsByCustomerUid,
   getOngoingContractsByCustomerUid,
   countLateReturnsByCustomer,
-} = require("../sql/queries/clients");
+} = require("../../sql/queries/clientsQueries");
 
 describe("Client queries (with mocked DB)", () => {
   beforeEach(() => {

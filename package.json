@@ -3,8 +3,11 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
-  },
+    "test": "jest",
+    "test:sql": "jest __tests__/sql",
+    "test:queries": "jest __tests__/queries",
+    "test:mongo": "jest __tests__/mongo"
+},
   "keywords": [],
   "author": "",
   "license": "ISC",

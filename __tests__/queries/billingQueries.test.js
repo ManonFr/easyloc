@@ -1,11 +1,11 @@
-jest.mock("../sql/sqlConnection");
+jest.mock("../../sql/sqlConnection");
 
-const db = require("../sql/sqlConnection");
+const db = require("../../sql/sqlConnection");
 const {
   getPaymentByContractId,
   isContractFullyPaid,
   getUnpaidContracts,
-} = require("../sql/queries/billingQueries");
+} = require("../../sql/queries/billingQueries");
 
 describe("Billing queries (with mocked DB)", () => {
   beforeEach(() => {
