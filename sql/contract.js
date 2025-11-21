@@ -1,12 +1,8 @@
-// sql/contract.js
-const { getSqlConnection } = require("./sqlConnection");
-
+const db = require("./sqlConnection");
 /**
  * Create the Contract table if it does not exist
  */
 async function createContractTable() {
-  const connection = await getSqlConnection();
-
   const query = `
     CREATE TABLE IF NOT EXISTS Contract (
       id INT PRIMARY KEY,
@@ -21,15 +17,13 @@ async function createContractTable() {
   `;
 
   try {
-    await connection.execute(query);
+    await db.query(query);
     console.log("Table Contract créée (ou déjà existante).");
   } catch (error) {
     console.error(
       "Erreur lors de la création de la table Contract :",
       error.message
     );
-  } finally {
-    await connection.end();
   }
 }
 
@@ -39,12 +33,14 @@ async function createContractTable() {
  * @returns {Object|null} The contract object if found, or null if not found
  */
 async function getContractById(id) {
-  const connection = await getSqlConnection();
-
-  const query = `SELECT * FROM Contract WHERE id = ?`;
-
+  const query = `
+    SELECT id, vehicle_uid, customer_uid, sign_datetime, loc_begin_datetime,
+           loc_end_datetime, returning_datetime, price
+    FROM Contract
+    WHERE id = ?
+  `;
   try {
-    const [rows] = await connection.execute(query, [id]);
+    const [rows] = await db.query(query, [id]);
 
     if (rows.length === 0) {
       console.log(`Aucun contrat trouvé avec l'id ${id}`);
@@ -56,8 +52,6 @@ async function getContractById(id) {
   } catch (error) {
     console.error("Erreur lors de la récupération du contrat :", error.message);
     return null;
-  } finally {
-    await connection.end();
   }
 }
 
@@ -66,8 +60,6 @@ async function getContractById(id) {
  * @param {Object} contract - The contract data to insert
  */
 async function insertContract(contract) {
-  const connection = await getSqlConnection();
-
   const query = `
     INSERT INTO Contract 
     (id, vehicle_uid, customer_uid, sign_datetime, loc_begin_datetime, loc_end_datetime, returning_datetime, price)
@@ -86,12 +78,11 @@ async function insertContract(contract) {
   ];
 
   try {
-    await connection.execute(query, values);
+    const [result] = await db.query(query, values);
     console.log("Contract inserted!");
+    return { id: contract.id, ...contract };
   } catch (error) {
     console.error("Error inserting contract:", error.message);
-  } finally {
-    await connection.end();
   }
 }
 
@@ -100,8 +91,6 @@ async function insertContract(contract) {
  * @param {Object} contract - The updated contract data (must include `id`)
  */
 async function updateContract(contract) {
-  const connection = await getSqlConnection();
-
   const query = `
     UPDATE Contract
     SET 
@@ -127,7 +116,7 @@ async function updateContract(contract) {
   ];
 
   try {
-    const [result] = await connection.execute(query, values);
+    const [result] = await db.query(query, values);
     if (result.affectedRows === 0) {
       console.log(`No contract found with id ${contract.id}`);
     } else {
@@ -135,8 +124,6 @@ async function updateContract(contract) {
     }
   } catch (error) {
     console.error("Error updating contract:", error.message);
-  } finally {
-    await connection.end();
   }
 }
 
@@ -145,12 +132,10 @@ async function updateContract(contract) {
  * @param {number} id - The ID of the contract to delete
  */
 async function deleteContract(id) {
-  const connection = await getSqlConnection();
-
   const query = `DELETE FROM Contract WHERE id = ?`;
 
   try {
-    const [result] = await connection.execute(query, [id]);
+    const [result] = await db.query(query, [id]);
     if (result.affectedRows === 0) {
       console.log(`No contract found with id ${id}`);
     } else {
@@ -158,8 +143,6 @@ async function deleteContract(id) {
     }
   } catch (error) {
     console.error("Error deleting contract:", error.message);
-  } finally {
-    await connection.end();
   }
 }
 
