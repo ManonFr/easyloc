@@ -11,4 +11,4 @@ async function getDb() {
   return client.db("easyloc");
 }
 
-module.exports = { getDb };
+module.exports = { getDb, client };
