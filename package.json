@@ -7,7 +7,7 @@
     "test:sql": "jest __tests__/sql",
     "test:queries": "jest __tests__/queries",
     "test:mongo": "jest __tests__/mongo"
-},
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -16,7 +16,8 @@
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "mongodb": "^6.21.0",
-    "mysql2": "^3.15.3"
+    "mysql2": "^3.15.3",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
