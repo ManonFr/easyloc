@@ -95,10 +95,28 @@ async function deleteVehicle(uid) {
   }
 }
 
+/**
+ * Count vehicles by km threshold
+ * @param {number} km - The threshold
+ * @param {string} operator - 'gt' for more than, 'lt' for less than
+ * @returns {number} - The count
+ */
+async function countVehiclesByKm(km, operator = "gt") {
+  const collection = await getVehicleCollection();
+  const query = operator === "gt" ? { km: { gt: km } } : { km: { lt: km } };
+
+  try {
+    return await collection.countDocuments(query);
+  } catch (err) {
+    throw new Error(`Error counting vehicles: ${err.message}`);
+  }
+}
+
 module.exports = {
   createVehicle,
   getVehicleByUid,
   getVehicleByPlate,
   updateVehicle,
   deleteVehicle,
+  countVehiclesByKm,
 };

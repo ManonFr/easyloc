@@ -6,6 +6,7 @@ const {
   getVehicleByPlate,
   updateVehicle,
   deleteVehicle,
+  countVehiclesByKm,
 } = require("../../mongo/vehicle");
 
 const { client } = require("../../mongo/mongoConnection");
@@ -57,6 +58,13 @@ describe("MongoDB vehicle module", () => {
 
     const deletedVehicle = await getVehicleByUid(testUid);
     expect(deletedVehicle).toBeNull();
+  });
+
+  test("countVehiclesByKm should vehicles above a threshold", async () => {
+    const count = await countVehiclesByKm(10000, "gt");
+
+    expect(typeof count).toBe("number");
+    expect(count).toBeGreaterThanOrEqual(0);
   });
 
   afterAll(async () => {
