@@ -1,4 +1,3 @@
-// mongo/Customer.js
 const { getDb } = require("./mongoConnection");
 const { v4: uuidv4 } = require("uuid");
 
@@ -41,7 +40,12 @@ async function createCustomer(data) {
  */
 async function getCustomerByUid(uid) {
   const collection = await getCustomerCollection();
-  return await collection.findOne({ uid });
+
+  try {
+    return await collection.findOne({ uid });
+  } catch (err) {
+    throw new Error(`Error fetching customer by uid: ${err.message}`);
+  }
 }
 
 /**
@@ -52,9 +56,14 @@ async function getCustomerByUid(uid) {
  */
 async function getCustomerByName(firstName, secondName) {
   const collection = await getCustomerCollection();
-  return await collection
-    .find({ first_name: firstName, second_name: secondName })
-    .toArray();
+
+  try {
+    return await collection
+      .find({ first_name: firstName, second_name: secondName })
+      .toArray();
+  } catch {
+    throw new Error(`Error fetching customer by name: ${err.message}`);
+  }
 }
 
 /**
@@ -66,12 +75,16 @@ async function getCustomerByName(firstName, secondName) {
 async function updateCustomer(uid, updates) {
   const collection = await getCustomerCollection();
 
-  const { matchedCount } = await collection.updateOne(
-    { uid },
-    { $set: updates }
-  );
+  try {
+    const { matchedCount } = await collection.updateOne(
+      { uid },
+      { $set: updates },
+    );
 
-  return matchedCount > 0;
+    return matchedCount > 0;
+  } catch (err) {
+    throw new Error(`Error updating customer: ${err.message}`);
+  }
 }
 
 /**
@@ -82,8 +95,12 @@ async function updateCustomer(uid, updates) {
 async function deleteCustomer(uid) {
   const collection = await getCustomerCollection();
 
-  const { deletedCount } = await collection.deleteOne({ uid });
-  return deletedCount > 0;
+  try {
+    const { deletedCount } = await collection.deleteOne({ uid });
+    return deletedCount > 0;
+  } catch (err) {
+    throw new Error(`Error deleting customer: ${err.message}`);
+  }
 }
 
 module.exports = {
