@@ -7,6 +7,7 @@ const {
   updateCustomer,
   deleteCustomer,
 } = require("../../mongo/customer");
+
 const { client } = require("../../mongo/mongoConnection");
 
 describe("MongoDB customer module", () => {
