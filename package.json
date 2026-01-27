@@ -8,10 +8,10 @@
     "test:queries": "jest __tests__/queries",
     "test:mongo": "jest __tests__/mongo"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["sql", "mongodb", "rental", "car", "dal"],
+  "author": "Manon FROMAGE",
   "license": "ISC",
-  "description": "",
+  "description": "Data Access Layer (DAL) for EasyLoc rental management",
   "dependencies": {
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
