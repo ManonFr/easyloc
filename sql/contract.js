@@ -18,12 +18,8 @@ async function createContractTable() {
 
   try {
     await db.query(query);
-    console.log("Table Contract créée (ou déjà existante).");
   } catch (error) {
-    console.error(
-      "Erreur lors de la création de la table Contract :",
-      error.message
-    );
+    throw new Error(`Failed to create Contract table: ${error.message}`);
   }
 }
 
@@ -41,17 +37,9 @@ async function getContractById(id) {
   `;
   try {
     const [rows] = await db.query(query, [id]);
-
-    if (rows.length === 0) {
-      console.log(`Aucun contrat trouvé avec l'id ${id}`);
-      return null;
-    }
-
-    console.log("Contrat trouvé :", rows[0]);
-    return rows[0];
+    return rows.length > 0 ? rows[0] : null;
   } catch (error) {
-    console.error("Erreur lors de la récupération du contrat :", error.message);
-    return null;
+    throw new Error(`Failed to retrieve contract: ${error.message}`);
   }
 }
 
@@ -78,11 +66,10 @@ async function insertContract(contract) {
   ];
 
   try {
-    const [result] = await db.query(query, values);
-    console.log("Contract inserted!");
+    await db.query(query, values);
     return { id: contract.id, ...contract };
   } catch (error) {
-    console.error("Error inserting contract:", error.message);
+    throw new Error(`Failed to insert contract: ${error.message}`);
   }
 }
 
@@ -118,12 +105,10 @@ async function updateContract(contract) {
   try {
     const [result] = await db.query(query, values);
     if (result.affectedRows === 0) {
-      console.log(`No contract found with id ${contract.id}`);
-    } else {
-      console.log(`Contract with id ${contract.id} updated!`);
+      throw new Error(`No contract found with id ${contract.id}`);
     }
   } catch (error) {
-    console.error("Error updating contract:", error.message);
+    throw new Error(`Failed to update contract: ${error.message}`);
   }
 }
 
@@ -137,12 +122,10 @@ async function deleteContract(id) {
   try {
     const [result] = await db.query(query, [id]);
     if (result.affectedRows === 0) {
-      console.log(`No contract found with id ${id}`);
-    } else {
-      console.log(`Contract with id ${id} deleted!`);
+      throw new Error(`No contract found with id ${id}`);
     }
   } catch (error) {
-    console.error("Error deleting contract:", error.message);
+    throw new Error(`Failed to delete contract: ${error.message}`);
   }
 }
 

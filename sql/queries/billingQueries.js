@@ -10,7 +10,7 @@ async function getPaymentByContractId(contractId) {
     `SELECT id, contract_id, amount, payment_datetime
         FROM Billing
         WHERE contract_id = ?`,
-    [contractId]
+    [contractId],
   );
   return rows;
 }
@@ -27,9 +27,8 @@ async function isContractFullyPaid(contractId) {
        (SELECT IFNULL(SUM(amount), 0) FROM Billing WHERE contract_id = ?) >=
        (SELECT price FROM Contract WHERE id = ?) AS is_paid
      `,
-    [contractId, contractId]
+    [contractId, contractId],
   );
-  console.log("rows:", rows);
 
   return rows[0]?.is_paid === 1;
 }
@@ -45,7 +44,7 @@ async function getUnpaidContracts() {
      FROM Contract c
      LEFT JOIN Billing b ON c.id = b.contract_id
      GROUP BY c.id
-     HAVING total_paid < c.price`
+     HAVING total_paid < c.price`,
   );
 
   return rows;
