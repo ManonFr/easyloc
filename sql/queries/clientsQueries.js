@@ -6,13 +6,19 @@ const db = require("../sqlConnection");
  * @returns {Promise<Array>} - Array of contract objects.
  */
 async function getContractsByCustomerUid(customerUid) {
-  const [rows] = await db.query(
-    `SELECT id, vehicle_uid, sign_datetime, loc_begin_datetime, loc_end_datetime, returning_datetime, price
+  try {
+    const [rows] = await db.query(
+      `SELECT id, vehicle_uid, sign_datetime, loc_begin_datetime, loc_end_datetime, returning_datetime, price
      FROM Contract
      WHERE customer_uid = ?`,
-    [customerUid],
-  );
-  return rows;
+      [customerUid],
+    );
+    return rows;
+  } catch (error) {
+    throw new Error(
+      `Error retrieving contracts for customer ${customerUid}: ${error.message}`,
+    );
+  }
 }
 
 /**
@@ -22,15 +28,21 @@ async function getContractsByCustomerUid(customerUid) {
  * @returns {Promise<Array>}
  */
 async function getOngoingContractsByCustomerUid(customerUid) {
-  const [rows] = await db.query(
-    `SELECT id, vehicle_uid, loc_begin_datetime, loc_end_datetime
+  try {
+    const [rows] = await db.query(
+      `SELECT id, vehicle_uid, loc_begin_datetime, loc_end_datetime
      FROM Contract
      WHERE customer_uid = ?
      AND NOW() BETWEEN loc_begin_datetime AND loc_end_datetime
      AND (returning_datetime IS NULL OR returning_datetime > NOW())`,
-    [customerUid],
-  );
-  return rows;
+      [customerUid],
+    );
+    return rows;
+  } catch (error) {
+    throw new Error(
+      `Error retrieving ongoing contracts for customer ${customerUid}: ${error.message}`,
+    );
+  }
 }
 
 /**
@@ -39,14 +51,20 @@ async function getOngoingContractsByCustomerUid(customerUid) {
  * @returns {Promise<Array>} - Array of {customer_uid, late_returns_count}
  */
 async function countLateReturnsByCustomer() {
-  const [rows] = await db.query(
-    `SELECT customer_uid,
+  try {
+    const [rows] = await db.query(
+      `SELECT customer_uid,
             COUNT(*) AS late_returns_count
      FROM Contract
      WHERE TIMESTAMPDIFF(HOUR, loc_end_datetime, returning_datetime) > 1
      GROUP BY customer_uid`,
-  );
-  return rows;
+    );
+    return rows;
+  } catch (error) {
+    throw new Error(
+      `Error counting late returns by customer; ${error.message}`,
+    );
+  }
 }
 
 /**
