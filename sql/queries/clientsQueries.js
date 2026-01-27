@@ -10,7 +10,7 @@ async function getContractsByCustomerUid(customerUid) {
     `SELECT id, vehicle_uid, sign_datetime, loc_begin_datetime, loc_end_datetime, returning_datetime, price
      FROM Contract
      WHERE customer_uid = ?`,
-    [customerUid]
+    [customerUid],
   );
   return rows;
 }
@@ -28,7 +28,7 @@ async function getOngoingContractsByCustomerUid(customerUid) {
      WHERE customer_uid = ?
      AND NOW() BETWEEN loc_begin_datetime AND loc_end_datetime
      AND (returning_datetime IS NULL OR returning_datetime > NOW())`,
-    [customerUid]
+    [customerUid],
   );
   return rows;
 }
@@ -44,13 +44,32 @@ async function countLateReturnsByCustomer() {
             COUNT(*) AS late_returns_count
      FROM Contract
      WHERE TIMESTAMPDIFF(HOUR, loc_end_datetime, returning_datetime) > 1
-     GROUP BY customer_uid`
+     GROUP BY customer_uid`,
   );
   return rows;
+}
+
+/**
+ * Get the number of contracts per customer.
+ * @returns {Promise<Array>} - Array of { customer_uid, total_contracts }
+ */
+async function groupContractsByCustomer() {
+  try {
+    const [rows] = await db.query(
+      `SELECT customer_uid,
+              COUNT(*) AS total_contracts
+       FROM Contract
+       GROUP BY customer_uid`,
+    );
+    return rows;
+  } catch (error) {
+    throw new Error(`Error grouping contracts by customer: ${error.message}`);
+  }
 }
 
 module.exports = {
   getContractsByCustomerUid,
   getOngoingContractsByCustomerUid,
   countLateReturnsByCustomer,
+  groupContractsByCustomer,
 };

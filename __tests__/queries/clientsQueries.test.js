@@ -6,6 +6,7 @@ const {
   getContractsByCustomerUid,
   getOngoingContractsByCustomerUid,
   countLateReturnsByCustomer,
+  groupContractsByCustomer,
 } = require("../../sql/queries/clientsQueries");
 
 describe("Client queries (with mocked DB)", () => {
@@ -54,6 +55,20 @@ describe("Client queries (with mocked DB)", () => {
     const result = await countLateReturnsByCustomer();
 
     expect(result).toEqual(fakeLateReturns);
+    expect(db.query).toHaveBeenCalledWith(expect.any(String));
+  });
+
+  test("groupContractsByCustomer should return contract count per customer", async () => {
+    const fakeGroupedData = [
+      { customer_uid: "cust-001", total_contracts: 3 },
+      { customer_uid: "cust-002", total_contracts: 1 },
+    ];
+
+    db.query.mockResolvedValue([fakeGroupedData]);
+
+    const result = await groupContractsByCustomer();
+
+    expect(result).toEqual(fakeGroupedData);
     expect(db.query).toHaveBeenCalledWith(expect.any(String));
   });
 });
