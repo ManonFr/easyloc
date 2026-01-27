@@ -6,13 +6,19 @@ const db = require("../sqlConnection");
  * @returns {Promise<Array>} - List of billing entries.
  */
 async function getPaymentByContractId(contractId) {
-  const [rows] = await db.query(
-    `SELECT id, contract_id, amount, payment_datetime
+  try {
+    const [rows] = await db.query(
+      `SELECT id, contract_id, amount, payment_datetime
         FROM Billing
         WHERE contract_id = ?`,
-    [contractId],
-  );
-  return rows;
+      [contractId],
+    );
+    return rows;
+  } catch (error) {
+    throw new Error(
+      `Error retrieving payments for contract ${contractId}: ${error.message}`,
+    );
+  }
 }
 
 /**
@@ -22,15 +28,21 @@ async function getPaymentByContractId(contractId) {
  * @returns {Promise<boolean>}
  */
 async function isContractFullyPaid(contractId) {
-  const [rows] = await db.query(
-    `SELECT
+  try {
+    const [rows] = await db.query(
+      `SELECT
        (SELECT IFNULL(SUM(amount), 0) FROM Billing WHERE contract_id = ?) >=
        (SELECT price FROM Contract WHERE id = ?) AS is_paid
      `,
-    [contractId, contractId],
-  );
+      [contractId, contractId],
+    );
 
-  return rows[0]?.is_paid === 1;
+    return rows[0]?.is_paid === 1;
+  } catch (error) {
+    throw new Error(
+      `Error checking payment status for contract ${contractId}: ${error.message}`,
+    );
+  }
 }
 
 /**
@@ -39,15 +51,19 @@ async function isContractFullyPaid(contractId) {
  * @returns {Promise<Array>} - List of unpaid contracts.
  */
 async function getUnpaidContracts() {
-  const [rows] = await db.query(
-    `SELECT c.id, c.customer_uid, c.price, IFNULL(SUM(b.amount), 0) AS total_paid
+  try {
+    const [rows] = await db.query(
+      `SELECT c.id, c.customer_uid, c.price, IFNULL(SUM(b.amount), 0) AS total_paid
      FROM Contract c
      LEFT JOIN Billing b ON c.id = b.contract_id
      GROUP BY c.id
      HAVING total_paid < c.price`,
-  );
+    );
 
-  return rows;
+    return rows;
+  } catch (error) {
+    throw new Error(`Error retrieving unpaid contracts: ${error.message}`);
+  }
 }
 
 module.exports = {
