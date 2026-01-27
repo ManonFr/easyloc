@@ -1,3 +1,4 @@
+// Use the mocked DB connection
 jest.mock("../../sql/sqlConnection");
 
 const db = require("../../sql/sqlConnection");
@@ -9,7 +10,7 @@ const {
 
 describe("Billing queries (with mocked DB)", () => {
   beforeEach(() => {
-    db.query.mockReset();
+    db.query.mockReset(); // Reset mock before each test
   });
 
   test("getPaymentByContractId should return list of payments for a contract", async () => {
